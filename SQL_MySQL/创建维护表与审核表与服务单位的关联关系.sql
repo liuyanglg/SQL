@@ -14,17 +14,9 @@ INSERT INTO dataserver.`tb_code_serviceid` (`code`, `serviceid`)(
 		maintain.`code`,
 		bind_service.`c_serviceid`
 	FROM
-		dataserver.`tb_cmp_card_audit` maintain
+		dataserver.`tb_cmp_card`  maintain
 	JOIN platformkf.`portal_buyer_bind_service` bind_service ON (
 		maintain.`taxid` = bind_service.`c_texnum`
-		AND (
-			maintain.`code` IS NOT NULL
-			AND maintain.`code` != ''
-		)
-		AND (
-			maintain.`taxid` IS NOT NULL
-			AND maintain.`taxid` != ''
-		)
 		AND (
 			bind_service.`c_serviceid` IS NOT NULL
 			AND bind_service.`c_serviceid` != ''
@@ -53,7 +45,7 @@ INSERT INTO dataserver.`tb_code_taxid_serviceid` (`code`, `taxid`, `serviceid`)(
 			-- 如果审核表code为空，则根据审核表taxid直接查询serviceid
 			SELECT DISTINCT
 				audit.`code`,
-				maintain.`taxid`,
+				audit.`taxid`,
 				bind_service.`c_serviceid`
 			FROM
 				dataserver.`tb_cmp_card_audit` audit
