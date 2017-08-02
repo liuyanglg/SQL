@@ -1,4 +1,4 @@
--- 创建六位代码和服务单位ID关系表
+-- 创建维护表六位代码和服务单位ID关系表
 DROP TABLE
 IF EXISTS dataserver.`tb_code_serviceid`;
 
@@ -8,40 +8,27 @@ IF NOT EXISTS dataserver.`tb_code_serviceid` (
 	`serviceid` VARCHAR (30)
 );
 
--- 创建六位代码和服务单位ID关系缓存表，由于查询出可能会存在完全重复的记录，需要一张缓存表
-DROP TABLE
-IF EXISTS dataserver.`tb_code_serviceid_temp`;
-
-CREATE TABLE
-IF NOT EXISTS dataserver.`tb_code_serviceid_temp` LIKE dataserver.`tb_code_serviceid`;
-
--- 将将税号转换为六位代码，然后放入缓存表
-INSERT INTO dataserver.`tb_code_serviceid_temp` (`code`, `serviceid`)(
+-- 将税号转换为六位代码，然后插入到新建表
+INSERT INTO dataserver.`tb_code_serviceid` (`code`, `serviceid`)(
 	SELECT
-		tc.`code`,
-		ts.`c_serviceid`
+		maintain.`code`,
+		bind_service.`c_serviceid`
 	FROM
-		dataserver.`tb_cmp_card_audit` tc,
-		platformkf.`portal_buyer_bind_service` ts
-	WHERE
-		tc.`code` IS NOT NULL
-	AND tc.`code` != ''
-	AND tc.`taxid` IS NOT NULL
-	AND tc.`taxid` != ''
-	AND ts.`c_texnum` IS NOT NULL
-	AND ts.`c_texnum` != ''
-	AND ts.`c_serviceid` IS NOT NULL
-	AND ts.`c_serviceid` != ''
-	AND tc.`taxid` = ts.`c_texnum`
+		dataserver.`tb_cmp_card_audit` maintain
+	JOIN platformkf.`portal_buyer_bind_service` bind_service ON (
+		maintain.`taxid` = bind_service.`c_texnum`
+		AND (
+			maintain.`code` IS NOT NULL
+			AND maintain.`code` != ''
+		)
+		AND (
+			maintain.`taxid` IS NOT NULL
+			AND maintain.`taxid` != ''
+		)
+		AND (
+			bind_service.`c_serviceid` IS NOT NULL
+			AND bind_service.`c_serviceid` != ''
+		)
+	)
 );
-
--- 去除缓存表中重复数据，然后插入关系表
-INSERT INTO dataserver.`tb_code_serviceid` SELECT DISTINCT
-	*
-FROM
-	dataserver.`tb_code_serviceid_temp`;
-
--- 删除缓存表
-DROP TABLE
-IF EXISTS dataserver.`tb_code_serviceid_temp`;
 
