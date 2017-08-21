@@ -5,7 +5,8 @@
 CREATE TABLE
 IF NOT EXISTS dataserver.`tb_code_serviceid` (
   `code`      VARCHAR(16),
-  `serviceid` VARCHAR(30)
+  `serviceid` VARCHAR(30),
+  KEY `code_index` (`code`) USING BTREE
 );
 
 #1.2
@@ -38,7 +39,8 @@ CREATE TABLE
 IF NOT EXISTS dataserver.`tb_code_taxid_serviceid` (
   `code`      VARCHAR(16),
   `taxid`     VARCHAR(30),
-  `serviceid` VARCHAR(30)
+  `serviceid` VARCHAR(30),
+  KEY `serviceid_index` (`serviceid`) USING BTREE
 );
 
 #2.2
